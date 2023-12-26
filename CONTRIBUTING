@@ -1,0 +1,2 @@
+Branching strategy: The branching strategy that is currently used: feature/implement-(issue).
+After feature/implement-(issue) branch is ready, merge request should be made to feature/implement-ci/cd branch
