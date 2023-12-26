@@ -2,10 +2,12 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import { Application, json } from "express";
+import { Server, IncomingMessage, ServerResponse } from 'http';
 
 dotenv.config();
 
-const app: Application = express();
+export const app: Application = express();
+export let listenServer: any; // Making this workaround, so that the server can be closed after the unit tests have passed
 
 app.use(json());
 
@@ -16,7 +18,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 8080
 
 try {
-    app.listen(PORT, () => {
+    listenServer = app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
     });
 }
