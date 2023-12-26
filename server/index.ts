@@ -11,15 +11,15 @@ export let listenServer: any; // Making this workaround, so that the server can 
 app.use(json());
 
 app.get("/", (req, res) => {
-	return res.status(200).json({ message: "Hello World!" });
+  return res.status(200).json({ message: "Hello World!" });
 });
 
 const PORT = process.env.PORT || 8080;
 
 try {
-	listenServer = app.listen(PORT, () => {
-		console.log(`Server started on port ${PORT}`);
-	});
+  listenServer = app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+  });
 } catch (error) {
-	console.log("Failed to start the server with error : ${error}");
+  console.log("Failed to start the server with error : ${error}");
 }
