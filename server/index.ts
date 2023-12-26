@@ -1,8 +1,7 @@
-import dotenv from 'dotenv';
-import express from 'express';
+import dotenv from "dotenv";
+import express from "express";
 
 import { Application, json } from "express";
-import { Server, IncomingMessage, ServerResponse } from 'http';
 
 dotenv.config();
 
@@ -12,16 +11,15 @@ export let listenServer: any; // Making this workaround, so that the server can 
 app.use(json());
 
 app.get("/", (req, res) => {
-    return res.status(200).json({'message':'Hello World!'});
+    return res.status(200).json({ message: "Hello World!" });
 });
 
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 8080;
 
 try {
     listenServer = app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
     });
-}
-catch(error){
+} catch (error) {
     console.log("Failed to start the server with error : ${error}");
 }

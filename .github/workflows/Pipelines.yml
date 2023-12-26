@@ -1,1 +1,31 @@
-# Initial stage
+name: Pipeline For Style Check
+
+on: [pull_request, push]
+
+jobs:
+  code-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check Code Style
+        run:  cd server/ && npm install && npm run lint
+
+  editor-config-check:
+    needs: code-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: editorconfig-checker/action-editorconfig-checker@main
+      - run:  editorconfig-checker
+
+  markdown-files-check:
+    needs: editor-config-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
