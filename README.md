@@ -1,2 +1,3 @@
 # Car-Dealership
-Car Dealership with automated CI/CD
+
+The CI/CD will be implemented in this branch(feature/imlement-ci/cd)
