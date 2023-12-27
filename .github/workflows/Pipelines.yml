@@ -74,10 +74,7 @@ jobs:
         with:
             node-version: '16'
 
-      - name: Navigate to the folder with .ts code
-        run: cd server/
-
       - name: Snyk monitor
-        run: snyk test
+        run: cd server/ && snyk test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
