@@ -96,6 +96,6 @@ jobs:
           projectBaseDir: /github/workspace/server
           args: >
               -Dsonar.organization=${{ secrets.SONARCLOUD_ORG_TOKEN }}
-              -Dsonar.projectKey=${{ secrets.PROJECT_KEY }}
+              -Dsonar.projectKey=${{ secrets.SONARCLOUD_PROJECT_KEY }}
               -Dsonar.tests=unit-tests/
               -Dsonar.verbose=true
