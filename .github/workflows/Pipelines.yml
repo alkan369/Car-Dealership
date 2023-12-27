@@ -120,7 +120,7 @@ jobs:
         run: cd server/ && npm install
 
       - name: Build & Run Unit Tests
-        run: cd server/ tsc && npx jest
+        run: cd server/ && tsc && npx jest
 
       - name: Login in DockerHub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
