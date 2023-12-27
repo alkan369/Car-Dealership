@@ -1,9 +1,24 @@
-name: Pipeline For Style Check
+name: Pipeline For Security And Style Check
 
 on: [pull_request, push]
 
 jobs:
+  git-leaks:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v3
+          with:
+            fetch-depth: 0 # Fetch all history for all tags and branches
+        
+        - name: Git Leaks Check
+          uses: gitleaks/gitleaks-action@v2
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   code-check:
+    needs: git-leaks
     runs-on: ubuntu-latest
 
     steps:
@@ -14,7 +29,7 @@ jobs:
         run:  cd server/ && npm install && npm run lint:fix
 
   editor-config-check:
-    needs: code-check
+    needs: git-leaks
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +43,7 @@ jobs:
         run:  editorconfig-checker
 
   markdown-files-check:
-    needs: editor-config-check
+    needs: git-leaks
     runs-on: ubuntu-latest
 
     steps:
@@ -42,3 +57,45 @@ jobs:
         
       - name: Install Markdown Lint And Check Markdown Files
         run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
+  
+  snyk-check:
+    needs: [code-check, editor-config-check, markdown-files-check]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Snyk
+        uses: snyk/actions/setup@master
+      
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '16'
+
+      - name: Snyk monitor
+        run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
+  
+  sonarcloud:
+    needs: [code-check, editor-config-check, markdown-files-check]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        with:
+          projectBaseDir: /github/workspace/server
+          args: >
+              -Dsonar.organization=${{ secrets.SONARCLOUD_ORG_TOKEN }}
+              -Dsonar.projectKey=${{ secrets.SONARCLOUD_PROJECT_KEY }}
+              -Dsonar.tests=unit-tests/
+              -Dsonar.verbose=true
