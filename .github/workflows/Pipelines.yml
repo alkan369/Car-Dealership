@@ -1,8 +1,18 @@
-name: Pipeline For Style Check
+name: Pipeline For Security And Style Check
 
 on: [pull_request, push]
 
 jobs:
+  git-leaks-security-check:
+    name: git-leaks
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v3
+          with:
+            fetch-depth: 0
+        - uses: gitleaks/gitleaks-action@v2
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   code-check:
     runs-on: ubuntu-latest
 
