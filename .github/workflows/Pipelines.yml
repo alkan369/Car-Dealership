@@ -77,4 +77,4 @@ jobs:
       - name: Snyk monitor
         run: cd server/ && snyk test
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN2 }}
