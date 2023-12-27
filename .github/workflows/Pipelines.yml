@@ -116,8 +116,8 @@ jobs:
         with:
             node-version: '16'
 
-      - name: NPM install
-        run: npm install
+      - name: Navigate To Package.json file And Execute NPM install
+        run: cd server/ && npm install
 
       - name: Build & Run Unit Tests
         run: tsc && npx jest
