@@ -3,16 +3,20 @@ name: Pipeline For Security And Style Check
 on: [pull_request, push]
 
 jobs:
-  git-leaks-security-check:
-    name: git-leaks
+  git-leaks:
     runs-on: ubuntu-latest
+
     steps:
-        - uses: actions/checkout@v3
+        - name: Checkout Code
+          uses: actions/checkout@v3
           with:
-            fetch-depth: 0
-        - uses: gitleaks/gitleaks-action@v2
+            fetch-depth: 0 # Fetch all history for all tags and branches
+        
+        - name: Git Leaks Check
+          uses: gitleaks/gitleaks-action@v2
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   code-check:
     needs: git-leaks
     runs-on: ubuntu-latest
@@ -55,7 +59,7 @@ jobs:
         run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
   
   snyk-check:
-    needs: code-check, editor-config-check, markdown-files-check
+    needs: [code-check, editor-config-check, markdown-files-check]
     runs-on: ubuntu-latest
 
     steps:
