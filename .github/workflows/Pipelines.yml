@@ -96,6 +96,6 @@ jobs:
           projectBaseDir: Car-Dealership/Car-Dealership/server
           args: >
               -Dsonar.organization=${{ secrets.SONARCLOUD_ORG_TOKEN }}
-              -Dsonar.projectKey=alkan369_Car_Dealership
+              -Dsonar.projectKey=${{ secrets.PROJECT_KEY }}
               -Dsonar.tests=unit-tests/
               -Dsonar.verbose=true
