@@ -76,3 +76,26 @@ jobs:
 
       - name: Snyk monitor
         run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
+  
+  sonarcloud:
+    needs: [code-check, editor-config-check, markdown-files-check]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        with:
+          projectBaseDir: Car-Dealership/Car-Dealership/server
+          args: >
+              -Dsonar.organization=${{ secrets.SONARCLOUD_ORG_TOKEN }}
+              -Dsonar.projectKey=alkan369_Car_Dealership
+              -Dsonar.tests=unit-tests/
+              -Dsonar.verbose=true
