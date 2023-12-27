@@ -75,9 +75,6 @@ jobs:
             node-version: '16'
 
       - name: Snyk monitor
-        # run: cd server/ && snyk test --severity-threshold=high
-        uses: snyk/actions/node@master
+        run: cd server/ && snyk test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN2 }}
-        with:
-          args: --severity-threshold=high
