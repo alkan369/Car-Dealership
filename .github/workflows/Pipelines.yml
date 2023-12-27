@@ -99,3 +99,48 @@ jobs:
               -Dsonar.projectKey=${{ secrets.SONARCLOUD_PROJECT_KEY }}
               -Dsonar.tests=unit-tests/
               -Dsonar.verbose=true
+  
+  build-image:
+    needs: [snyk-check, sonarcloud]
+    runs-on: ubuntu-latest
+
+    env:
+      PROJ_NAME: car-dealership
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '16'
+
+      - name: NPM install
+        run: npm install
+
+      - name: Build & Run Unit Tests
+        run: tsc && npx jest
+
+      - name: Login in DockerHub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get Git Commit SHA
+        id: git_sha
+        run: echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build and Tag Docker image
+        run: cd server/ && docker build -t ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }} .
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }}
