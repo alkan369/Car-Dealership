@@ -14,6 +14,7 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   code-check:
+    needs: git-leaks
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +25,7 @@ jobs:
         run:  cd server/ && npm install && npm run lint:fix
 
   editor-config-check:
-    needs: code-check
+    needs: git-leaks
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +39,7 @@ jobs:
         run:  editorconfig-checker
 
   markdown-files-check:
-    needs: editor-config-check
+    needs: git-leaks
     runs-on: ubuntu-latest
 
     steps:
@@ -52,3 +53,24 @@ jobs:
         
       - name: Install Markdown Lint And Check Markdown Files
         run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
+  
+  snyk-check:
+    needs: code-check, editor-config-check, markdown-files-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Snyk
+        uses: snyk/actions/setup@master
+      
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '16'
+
+      - name: Snyk monitor
+        run: snyk test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
