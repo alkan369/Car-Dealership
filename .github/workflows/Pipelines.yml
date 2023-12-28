@@ -156,7 +156,7 @@ jobs:
           ssh-private-key: ${{ secrets.AWS_EC2_SSH_KEY }}
       
       - name: SSH Into AWS EC2 And Pull Docker Image
-        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker pull ${{ secrets.DOCKER_USERNAME }}/car-dealership:latest"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker pull ${{ secrets.DOCKER_USERNAME }}/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
 
       - name: SSH Into AWS EC2 And Start Docker Container
-        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-car-dealership-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/car-dealership:latest"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-car-dealership-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
