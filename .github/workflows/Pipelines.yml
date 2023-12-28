@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJ_NAME = car-dealership
+      PROJ_NAME: car-dealership
 
     steps:
       - name: Checkout Code
