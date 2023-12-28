@@ -74,7 +74,7 @@ jobs:
         with:
             node-version: '16'
 
-      - name: Snyk monitor
+      - name: Snyk Monitor
         run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
   
   sonarcloud:
@@ -116,23 +116,23 @@ jobs:
         with:
             node-version: '16'
 
-      - name: Navigate To Package.json file And Execute NPM install
+      - name: Navigate To Package.json File And Execute NPM Install
         run: cd server/ && npm install
 
       - name: Build & Run Unit Tests
         run: cd server/ && tsc && npx jest
 
-      - name: Login in DockerHub
+      - name: Login In DockerHub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Get Git Commit SHA
         id: git_sha
         run: echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
 
-      - name: Build and Tag Docker image
+      - name: Build And Tag Docker Image
         run: cd server/ && docker build -t ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }} .
       
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}
@@ -142,5 +142,21 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
       
-      - name: Push Docker image
+      - name: Push Docker Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }}
+
+  deploy-to-aws-ec2:
+    needs: build-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.AWS_EC2_SSH_KEY }}
+      
+      - name: SSH Into AWS EC2 And Pull Docker Image
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "docker pull ${{ secrets.DOCKER_USERNAME }}/car-dealership:latest"
+
+      - name: SSH Into AWS EC2 And Start Docker Container
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "docker run -d --name ${{ secrets.DOCKER_USERNAME }}-car-dealership-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/car-dealership:latest"
