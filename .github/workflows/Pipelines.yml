@@ -175,7 +175,7 @@ jobs:
 
       - name: SSH Into AWS EC2 And Delete All Running Containers And Images In Docker
         # run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
-        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo systemctl status docker; echo"After checking docker status"; echo $(sudo docker ps); echo $(sudo docker ps -a); echo $(sudo docker ps -aq); echo $(sudo docker ps -a -q); echo "After echoing all containers"; sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo systemctl status docker; echo"After checking docker status"; sudo docker container ls -a; sudo docker container ls -a -q; echo "After docker container ls -a"; echo $(sudo docker ps); echo $(sudo docker ps -a); echo $(sudo docker ps -aq); echo $(sudo docker ps -a -q); echo "After echoing all containers"; sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
         continue-on-error: true
 
       - name: SSH Into AWS EC2 And Pull Docker Image
