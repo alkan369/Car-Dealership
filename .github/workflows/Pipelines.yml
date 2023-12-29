@@ -175,7 +175,7 @@ jobs:
 
       - name: SSH Into AWS EC2 And Delete All Running Containers And Images In Docker
         # run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker container ls -a; sudo docker container ls -a -q; echo "After docker container ls -a"; sudo docker ps; sudo docker ps -a; sudo docker ps -aq; sudo docker ps -a -q; echo "After echoing all containers"; sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker container ls -a; sudo docker container ls -a -q; echo "After docker container ls -a"; sudo docker ps; sudo docker ps -a; sudo docker ps -aq; echo $(sudo docker ps -a -q); echo "After echoing all containers"; sudo docker ps -a -q | xargs -I {} sudo docker stop {}; sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
         continue-on-error: true
 
       - name: SSH Into AWS EC2 And Pull Docker Image
