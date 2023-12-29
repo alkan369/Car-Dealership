@@ -75,7 +75,7 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-            node-version: '16'
+            node-version: '16' # run on 16 as version 12 is deprecated
 
       - name: Snyk Monitor
         run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
@@ -114,7 +114,7 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-            node-version: '16'
+            node-version: '16' # run on 16 as version 12 is deprecated
 
       - name: Navigate To Package.json File And Execute NPM Install
         run: cd server/ && npm install
@@ -161,7 +161,7 @@ jobs:
 
     steps:
       - name: Configure SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.AWS_EC2_SSH_KEY }}
 
