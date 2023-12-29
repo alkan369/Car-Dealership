@@ -174,8 +174,8 @@ jobs:
         run: IMAGE_NAME=$(cat image_name.txt) && echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
       - name: SSH Into AWS EC2 And Delete All Running Containers And Images In Docker
-        # run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker ps -a -q | xargs sudo docker stop; sudo docker ps -a -q | xargs sudo docker rm; sudo docker images -a -q | xargs sudo docker rmi"
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
+        continue-on-error: true
 
       - name: SSH Into AWS EC2 And Pull Docker Image
         run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker pull ${{ env.IMAGE_NAME }}"
