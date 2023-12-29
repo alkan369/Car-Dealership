@@ -2,151 +2,151 @@ name: Pipeline For Security And Style Check
 
 on: [pull_request, push]
 
+env:
+  PROJ_NAME: car-dealership
+
 jobs:
-  # git-leaks:
-  #   runs-on: ubuntu-latest
+  git-leaks:
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #       - name: Checkout Code
-  #         uses: actions/checkout@v3
-  #         with:
-  #           fetch-depth: 0 # Fetch all history for all tags and branches
+    steps:
+        - name: Checkout Code
+          uses: actions/checkout@v3
+          with:
+            fetch-depth: 0 # Fetch all history for all tags and branches
         
-  #       - name: Git Leaks Check
-  #         uses: gitleaks/gitleaks-action@v2
-  #         env:
-  #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Git Leaks Check
+          uses: gitleaks/gitleaks-action@v2
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # code-check:
-  #   needs: git-leaks
-  #   runs-on: ubuntu-latest
+  code-check:
+    needs: git-leaks
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  #     - name: Check Code Style
-  #       run:  cd server/ && npm install && npm run lint:fix
+      - name: Check Code Style
+        run:  cd server/ && npm install && npm run lint:fix
 
-  # editor-config-check:
-  #   needs: git-leaks
-  #   runs-on: ubuntu-latest
+  editor-config-check:
+    needs: git-leaks
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  #     - name: Use Editor Config Checker Action  
-  #       uses: editorconfig-checker/action-editorconfig-checker@main
+      - name: Use Editor Config Checker Action
+        uses: editorconfig-checker/action-editorconfig-checker@main
     
-  #     - name: Run Editor Config Checker
-  #       run:  editorconfig-checker
+      - name: Run Editor Config Checker
+        run:  editorconfig-checker
 
-  # markdown-files-check:
-  #   needs: git-leaks
-  #   runs-on: ubuntu-latest
+  markdown-files-check:
+    needs: git-leaks
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
       
-  #     - name: Set Up Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #           node-version: '16' # run on 16 as version 12 is deprecated
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '16' # run on 16 as version 12 is deprecated
         
-  #     - name: Install Markdown Lint And Check Markdown Files
-  #       run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
+      - name: Install Markdown Lint And Check Markdown Files
+        run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
   
-  # snyk-check:
-  #   needs: [code-check, editor-config-check, markdown-files-check]
-  #   runs-on: ubuntu-latest
+  snyk-check:
+    needs: [code-check, editor-config-check, markdown-files-check]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  #     - name: Set Up Snyk
-  #       uses: snyk/actions/setup@master
+      - name: Set Up Snyk
+        uses: snyk/actions/setup@master
       
-  #     - name: Set Up Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #           node-version: '16'
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '16'
 
-  #     - name: Snyk Monitor
-  #       run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
+      - name: Snyk Monitor
+        run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
   
-  # sonarcloud:
-  #   needs: [code-check, editor-config-check, markdown-files-check]
-  #   runs-on: ubuntu-latest
+  sonarcloud:
+    needs: [code-check, editor-config-check, markdown-files-check]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0 # Fetch all history for all tags and branches
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
 
-  #     - name: SonarCloud Scan
-  #       uses: sonarsource/sonarcloud-github-action@master
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-  #       with:
-  #         projectBaseDir: /github/workspace/server
-  #         args: >
-  #             -Dsonar.organization=${{ secrets.SONARCLOUD_ORG_TOKEN }}
-  #             -Dsonar.projectKey=${{ secrets.SONARCLOUD_PROJECT_KEY }}
-  #             -Dsonar.tests=unit-tests/
-  #             -Dsonar.verbose=true
-  
-  # build-image:
-  #   needs: [snyk-check, sonarcloud]
-  #   runs-on: ubuntu-latest
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        with:
+          projectBaseDir: /github/workspace/server
+          args: >
+              -Dsonar.organization=${{ secrets.SONARCLOUD_ORG_TOKEN }}
+              -Dsonar.projectKey=${{ secrets.SONARCLOUD_PROJECT_KEY }}
+              -Dsonar.tests=unit-tests/
+              -Dsonar.verbose=true
 
-  #   env:
-  #     PROJ_NAME: car-dealership
+  build-image:
+    needs: [snyk-check, sonarcloud]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  #     - name: Set Up Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #           node-version: '16'
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '16'
 
-  #     - name: Navigate To Package.json File And Execute NPM Install
-  #       run: cd server/ && npm install
+      - name: Navigate To Package.json File And Execute NPM Install
+        run: cd server/ && npm install
 
-  #     - name: Build & Run Unit Tests
-  #       run: cd server/ && tsc && npx jest
+      - name: Build & Run Unit Tests
+        run: cd server/ && tsc && npx jest
 
-  #     - name: Login In DockerHub
-  #       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login In DockerHub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-  #     - name: Get Git Commit SHA
-  #       id: git_sha
-  #       run: echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
+      - name: Get Git Commit SHA
+        id: git_sha
+        run: echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
 
-  #     - name: Build And Tag Docker Image
-  #       run: cd server/ && docker build -t ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }} .
+      - name: Build And Tag Docker Image
+        run: cd server/ && docker build -t ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }} .
       
-  #     - name: Run Trivy Vulnerability Scanner
-  #       uses: aquasecurity/trivy-action@master
-  #       with:
-  #         image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}
-  #         format: 'table'
-  #         exit-code: '1'
-  #         ignore-unfixed: true
-  #         vuln-type: 'os,library'
-  #         severity: 'CRITICAL,HIGH'
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
       
-  #     - name: Push Docker Image
-  #       run: docker push ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }}
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }}
 
   deploy-to-aws-ec2:
-    # needs: build-image
+    needs: build-image
     runs-on: ubuntu-latest
 
     steps:
@@ -156,7 +156,7 @@ jobs:
           ssh-private-key: ${{ secrets.AWS_EC2_SSH_KEY }}
       
       - name: SSH Into AWS EC2 And Pull Docker Image
-        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker pull ${{ secrets.DOCKER_USERNAME }}/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}"
 
       - name: SSH Into AWS EC2 And Start Docker Container
-        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-car-dealership-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-${{ env.PROJ_NAME }}-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}"
