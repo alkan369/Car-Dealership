@@ -1,6 +1,9 @@
-name: Pipeline For Security And Style Check
+name: Pipeline For Security, Style Check, Building Image, Pushing It To DockerHub And Deployment
 
 on: [pull_request, push]
+
+env:
+  PROJ_NAME: car-dealership
 
 jobs:
   git-leaks:
@@ -36,7 +39,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Use Editor Config Checker Action  
+      - name: Use Editor Config Checker Action
         uses: editorconfig-checker/action-editorconfig-checker@main
     
       - name: Run Editor Config Checker
@@ -72,9 +75,9 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-            node-version: '16'
+            node-version: '16' # run on 16 as version 12 is deprecated
 
-      - name: Snyk monitor
+      - name: Snyk Monitor
         run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
   
   sonarcloud:
@@ -99,13 +102,10 @@ jobs:
               -Dsonar.projectKey=${{ secrets.SONARCLOUD_PROJECT_KEY }}
               -Dsonar.tests=unit-tests/
               -Dsonar.verbose=true
-  
+
   build-image:
     needs: [snyk-check, sonarcloud]
     runs-on: ubuntu-latest
-
-    env:
-      PROJ_NAME: car-dealership
 
     steps:
       - name: Checkout Code
@@ -114,25 +114,25 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-            node-version: '16'
+            node-version: '16' # run on 16 as version 12 is deprecated
 
-      - name: Navigate To Package.json file And Execute NPM install
+      - name: Navigate To Package.json File And Execute NPM Install
         run: cd server/ && npm install
 
       - name: Build & Run Unit Tests
         run: cd server/ && tsc && npx jest
 
-      - name: Login in DockerHub
+      - name: Login In DockerHub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Get Git Commit SHA
         id: git_sha
         run: echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
 
-      - name: Build and Tag Docker image
+      - name: Build And Tag Docker Image
         run: cd server/ && docker build -t ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }} .
-      
-      - name: Run Trivy vulnerability scanner
+
+      - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}
@@ -142,5 +142,43 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
       
-      - name: Push Docker image
+      - name: Push Docker Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/$PROJ_NAME-image:${{ env.SHA }}
+
+      - name: Save The Name Of The Image In A File
+        run: echo "${{ secrets.DOCKER_USERNAME }}/${{ env.PROJ_NAME }}-image:${{ env.SHA }}" > image_name.txt
+
+      - name: Upload The Docker Image Name As Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-name
+          path: image_name.txt
+          retention-days: 1
+
+  deploy-to-aws-ec2:
+    needs: build-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.AWS_EC2_SSH_KEY }}
+
+      - name: Download The Docker Image Name Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-name
+      
+      - name: Save The Docker Image Name To Env Variable
+        run: IMAGE_NAME=$(cat image_name.txt) && echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: SSH Into AWS EC2 And Delete All Running Containers And Images In Docker
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker ps -a -q | xargs -I {} sudo docker stop {}; sudo docker ps -a -q | xargs -I {} sudo docker rm {}; sudo docker images -a -q | xargs -I {} sudo docker rmi {}"
+        continue-on-error: true
+
+      - name: SSH Into AWS EC2 And Pull Docker Image
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker pull ${{ env.IMAGE_NAME }}"
+
+      - name: SSH Into AWS EC2 And Start Docker Container
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-${{ env.PROJ_NAME }}-container -p 80:8080 ${{ env.IMAGE_NAME }}"
