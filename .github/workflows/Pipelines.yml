@@ -174,13 +174,13 @@ jobs:
       #   run: IMAGE_NAME=$(cat image_name.txt) && echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
       - name: SSH Into AWS EC2 And Delete All Running Containers And Images In Docker
-        # run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "echo $(sudo docker ps); echo $(sudo docker ps -a); echo $(sudo docker ps -aq); echo $(sudo docker ps -a -q); echo "After echoing all containers"; sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
-        # continue-on-error: true
+        # run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo systemctl status docker; echo"After checking docker status"; echo $(sudo docker ps); echo $(sudo docker ps -a); echo $(sudo docker ps -aq); echo $(sudo docker ps -a -q); echo "After echoing all containers"; sudo docker stop $(sudo docker ps -a -q); sudo docker rm $(sudo docker ps -a -q); sudo docker rmi $(sudo docker images -a -q)"
+        continue-on-error: true
 
       - name: SSH Into AWS EC2 And Pull Docker Image
-        # run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker pull ${{ env.IMAGE_NAME }}"
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker pull alkan369/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
+        # run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker pull ${{ env.IMAGE_NAME }}"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker pull alkan369/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
 
       - name: SSH Into AWS EC2 And Start Docker Container
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_INSTANCE_ADDRESS }} "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-${{ env.PROJ_NAME }}-container -p 80:8080 alkan369/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
+        run: ssh -o StrictHostKeyChecking=no ubuntu@ec2-3-92-66-32.compute-1.amazonaws.com "sudo docker run -d --name ${{ secrets.DOCKER_USERNAME }}-${{ env.PROJ_NAME }}-container -p 80:8080 alkan369/car-dealership-image:abffc42465541d3a69b6001b7db1779c275ab4a0"
