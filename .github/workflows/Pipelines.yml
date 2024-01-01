@@ -56,7 +56,7 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-            node-version: '16' # run on 16 as version 12 is deprecated
+            node-version: '18' # run on 16 as version 12 is deprecated
         
       - name: Install Markdown Lint And Check Markdown Files
         run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
