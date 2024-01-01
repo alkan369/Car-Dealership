@@ -6,7 +6,7 @@ env:
   PROJ_NAME: car-dealership
 
 jobs:
-  git-leaks:
+  git-leaks-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   code-check:
-    needs: git-leaks
+    needs: git-leaks-check
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +32,7 @@ jobs:
         run:  cd server/ && npm install && npm run lint:fix
 
   editor-config-check:
-    needs: git-leaks
+    needs: git-leaks-check
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +46,7 @@ jobs:
         run:  editorconfig-checker
 
   markdown-files-check:
-    needs: git-leaks
+    needs: git-leaks-check
     runs-on: ubuntu-latest
 
     steps:
@@ -56,7 +56,7 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v3
         with:
-            node-version: '18' # run on 16 as version 12 is deprecated
+            node-version: '18' # run on 18 as version 12 is deprecated and version 16 is unsupported for markdownlint-cli
         
       - name: Install Markdown Lint And Check Markdown Files
         run:  npm install -g markdownlint-cli && markdownlint '**/*.md'
@@ -80,7 +80,7 @@ jobs:
       - name: Snyk Monitor
         run: cd server/ && snyk auth ${{ secrets.SNYK_TOKEN }} && snyk test --severity-threshold=high
   
-  sonarcloud:
+  sonarcloud-check:
     needs: [code-check, editor-config-check, markdown-files-check]
     runs-on: ubuntu-latest
 
@@ -104,7 +104,7 @@ jobs:
               -Dsonar.verbose=true
 
   build-image:
-    needs: [snyk-check, sonarcloud]
+    needs: [snyk-check, sonarcloud-check]
     runs-on: ubuntu-latest
 
     steps:
