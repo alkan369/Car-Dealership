@@ -11,6 +11,12 @@ describe("Test App", () => {
     expect(response.body).toEqual({ message: "Hello World!" });
   });
 
+  test("Check  Alkan's Endpoint! valid endpoint", async () => {
+    const response = await request(testApp).get("/alkan");
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ message: "Alkan's Endpoint!" });
+  });
+
   test("Check base invalid endpoint", async () => {
     const response = await request(testApp).get("/invalid");
     expect(response.status).toBe(404);

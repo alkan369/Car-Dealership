@@ -14,6 +14,10 @@ app.get("/", (req, res) => {
   return res.status(200).json({ message: "Hello World!" });
 });
 
+app.get("/alkan", (req, res) => {
+  return res.status(200).json({ message: "Alkan's Endpoint!" });
+});
+
 const PORT = process.env.PORT || 8080;
 
 try {
