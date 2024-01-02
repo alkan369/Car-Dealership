@@ -1,2 +1,2 @@
 # Car-Dealership
-Car Dealership with automated CI/CD
+Car Dealership initial stage in documentation
