@@ -103,3 +103,10 @@ Then through SSH(SSH is integrated in github actions) connects
 to the AWS EC2 instance, stops all the running docker containers,
 removes those docker containers and deletes all the images.
 Then it pull the latest docker image and starts a new container.
+
+### Deploy to Minikube via ArgoCD
+
+ArgoCD has been installed in local minicube, which tracks
+https://github.com/alkan369/argocd-app-config/tree/main
+where configuration for deployment and for ArgoCD is stored.
+When the version of the image is changed and the change is committed to the repository, ArgoCD automatically syncs the deployment with it.
