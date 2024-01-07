@@ -28,6 +28,18 @@ export const UserSchema = new Schema({
         type: Schema.Types.String,
         required: true
     },
+    cardExpMonth: {
+        type: Schema.Types.String,
+        required: true
+    },
+    cardExpYear: {
+        type: Schema.Types.String,
+        required: true
+    },
+    cardCVC: {
+        type: Schema.Types.String,
+        required: true
+    },
     boughtCarVINs: {
         type: [String],
         default: [],

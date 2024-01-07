@@ -1,6 +1,6 @@
 import express from "express";
 import { CarModel } from "../models/car.model";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import { engineType, transmissionType } from "../schemas/car.schema";
 import { UserModel } from "../models/user.model";
 
@@ -172,13 +172,38 @@ export async function addCar(
 ): Promise<void> {
     try {
         // add car, check the engine type, transmission type in the endpoint beforehand
+        const newCar = new CarModel({
+            id: new mongoose.Types.ObjectId(),
+            VIN: req.body.VIN,
+            brand: req.body.brand,
+            model: req.body.model,
+            year: req.body.year,
+            engine: req.body.engine,
+            transmission: req.body.transmission,
+            kilometers: req.body.kilometers,
+            price: req.body.price,
+            state: 'For Sale'
+        })
+
+        const validationError = newCar.validateSync();
+        if (validationError) {
+            res.status(400).json(validationError);
+            return;
+        }
+        await newCar.save();
+        res.status(201).json(newCar);
     }
     catch (error) {
         res.status(500).json(error);
     }
 }
 
-// remove car if For Sale, or Sold and only if leases are payed
+export async function removeCar(
+    req: express.Request,
+    res: express.Response
+): Promise<void> {
+    await CarModel.findOneAndDelete({ VIN: req.body.VIN });
+}
 
 export async function buyCar(
     req: express.Request,

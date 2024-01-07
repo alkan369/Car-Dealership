@@ -82,8 +82,6 @@ export async function createUser(
     res: express.Response
 ): Promise<void> {
     try {
-        // validate email(gmail) beforehand in the endpoint
-        // validate debit card beforehand in the endpoint
         const newUser = new UserModel({
             id: new mongoose.Types.ObjectId(),
             username: req.body.username,
@@ -92,6 +90,9 @@ export async function createUser(
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             debitCardNumber: hashSync(req.body.debitCardNumber, genSaltSync()),
+            cardExpMonth: hashSync(req.body.cardExpMonth, genSaltSync()),
+            cardExpYear: hashSync(req.body.cardExpYear, genSaltSync()),
+            cardCVC: hashSync(req.body.cardCVC, genSaltSync()),
             isAdmin: req.body.is_admin ? true : false
         })
 
