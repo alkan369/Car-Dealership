@@ -26,7 +26,7 @@ usersController.get('/view_by_email/:email', async (req, res) => {
 
     try {
         // validate Email
-        await validateEmail(req.params.email);
+        // await validateEmail(req.params.email);
     }
     catch (error) {
         return res.status(400).json(error);
@@ -89,7 +89,7 @@ usersController.post('/create', async (req, res) => {
 
     try {
         // validate Email
-        await validateEmail(email);
+        // await validateEmail(email);
     }
     catch (error) {
         return res.status(400).json(error);
@@ -170,11 +170,3 @@ usersController.delete('/delete/:username', validateAdmin, validateToken, async 
 })
 
 export default usersController;
-
-/** NOTES :
- * ADD LEASE OPTION DB(PRIMARY KEY : VIN, PERSON USERNAME, PERCENT FIRST PAY(10-50%), HOW MANY MONTHS(HOW MANY VNOSKI),PAY PER VNOSKA,REMAINING PAY)
- * WHEN BUYING A CAR : CHANGE THE CAR'S STATUS TO SOLD
- * IN USERS DB ADD ARRAY FIELD FOR RESERVED CARS, IF THEN DECIDED TO BUY THE CAR -> TO SOLD
- * ELSE UNRESERVE THE CAR
- * Purvonachalna vnoska, ostavashta cena / broy vnoski = cena na vnoska bez oskupqvane
-*/

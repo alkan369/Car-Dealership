@@ -1,13 +1,17 @@
 import { Router } from "express";
 import { CarModel } from "../../database/models/car.model";
 import { engineType, transmissionType } from "../../database/schemas/car.schema";
-import { addCar, getAllAvailableCars, getByBrand, getByBrandAndModel, getByBrandAndModelAndEngine, getByBrandAndModelAndEngineAndTransmission, getByEngine, getByEngineAndTransmission, getByTransmission, getByVIN, removeCar } from "../../database/methods/car.methods";
+import { addCar, getAllAvailableCars, getAllCars, getByBrand, getByBrandAndModel, getByBrandAndModelAndEngine, getByBrandAndModelAndEngineAndTransmission, getByEngine, getByEngineAndTransmission, getByTransmission, getByVIN, removeCar } from "../../database/methods/car.methods";
 import { LeaseModel } from "../../database/models/lease.model";
 import { validateAdmin, validateToken } from "../../middleware/token-validator";
 
 const carsController = Router()
 
 carsController.get('/view_all', async (req, res) => {
+    await getAllCars(req, res);
+});
+
+carsController.get('/view_all_available', async (req, res) => {
     await getAllAvailableCars(req, res);
 });
 

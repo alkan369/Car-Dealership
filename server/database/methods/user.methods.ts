@@ -93,7 +93,7 @@ export async function createUser(
             cardExpMonth: hashSync(req.body.cardExpMonth, genSaltSync()),
             cardExpYear: hashSync(req.body.cardExpYear, genSaltSync()),
             cardCVC: hashSync(req.body.cardCVC, genSaltSync()),
-            isAdmin: req.body.is_admin ? true : false
+            isAdmin: req.body.isAdmin ? true : false
         })
 
         const validationError = newUser.validateSync();
@@ -147,7 +147,6 @@ export async function deleteUser(
     try {
 
         const deletedUser = await UserModel.findOneAndDelete({ username: req.params.username });
-
         if (!deletedUser) {
             res.status(400).json({ 'message': 'No User With Such Username' });
             return;

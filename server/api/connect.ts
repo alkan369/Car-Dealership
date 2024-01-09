@@ -6,8 +6,8 @@ import leasesController from "./leases/leases-controller";
 const router = Router()
 
 export const connect = (app: Application, path: string): void => {
-    router.use('cars', carsController);
-    router.use('users', usersController);
-    router.use('leases', leasesController)
+    router.use('/cars', carsController);
+    router.use('/users', usersController);
+    router.use('/leases', leasesController)
     app.use(path, router);
 }

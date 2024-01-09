@@ -171,7 +171,6 @@ export async function addCar(
     res: express.Response
 ): Promise<void> {
     try {
-        // add car, check the engine type, transmission type in the endpoint beforehand
         const newCar = new CarModel({
             id: new mongoose.Types.ObjectId(),
             VIN: req.body.VIN,
@@ -202,7 +201,138 @@ export async function removeCar(
     req: express.Request,
     res: express.Response
 ): Promise<void> {
-    await CarModel.findOneAndDelete({ VIN: req.body.VIN });
+    try {
+        const deletedCar = await CarModel.findOneAndDelete({ VIN: req.body.VIN });
+        if (!deletedCar) {
+            res.status(400).json({ message: 'No Car With Such VIN' });
+            return;
+        }
+        res.status(200).json(deletedCar);
+    }
+    catch (error) {
+        res.status(500).json(error);
+    }
+}
+
+export async function reserveCar(
+    req: express.Request,
+    res: express.Response
+): Promise<void> {
+    try {
+        const reservingUser = await UserModel.findOne({ username: req.params.username });
+        if (!reservingUser) {
+            res.status(400).json({ message: 'No User With Such Username' });
+            return;
+        }
+
+        const carToBeReserved = await CarModel.findOne({ VIN: req.params.VIN });
+        if (!carToBeReserved) {
+            res.status(400).json({ message: 'No Car With Such VIN' });
+            return;
+        }
+
+        if (carToBeReserved.state !== 'For Sale') {
+            res.status(400).json({ message: 'The Car Is Not For Sale' });
+            return;
+        }
+
+        const reservedCar = await CarModel.findOneAndUpdate({ VIN: req.params.VIN },
+            {
+                $set:
+                {
+                    state: 'Reserved'
+                }
+            }
+        );
+
+        if (!reservedCar) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating Car Model' });
+            return;
+        }
+
+        const reservingForUser = await UserModel.findOneAndUpdate({ username: req.params.username },
+            {
+                $push:
+                {
+                    reservedCarVINs: req.params.VIN
+                }
+            }
+        );
+
+        if (!reservingForUser) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating User Model' });
+            return;
+        }
+
+        res.status(200).json({ reservedCar });
+
+    }
+    catch (error) {
+        res.status(500).json({ message: error });
+    }
+}
+
+export async function unReserveCar(
+    req: express.Request,
+    res: express.Response
+): Promise<void> {
+    try {
+        const reservingUser = await UserModel.findOne({ username: req.params.username });
+        if (!reservingUser) {
+            res.status(400).json({ message: 'No User With Such Username' });
+            return;
+        }
+
+        const carToBeUnReserved = await CarModel.findOne({ VIN: req.params.VIN });
+        if (!carToBeUnReserved) {
+            res.status(400).json({ message: 'No Car With Such VIN' });
+            return;
+        }
+
+        if (carToBeUnReserved.state !== 'Reserved') {
+            res.status(400).json({ message: 'The Car Is Not Reserved' });
+            return;
+        }
+
+        if (reservingUser.reservedCarVINs.indexOf(req.params.VIN) === -1) {
+            res.status(400).json({ message: `The Car Is Not Reserved By ${req.params.username}` });
+            return;
+        }
+
+        const unReservedCar = await CarModel.findOneAndUpdate({ VIN: req.params.VIN },
+            {
+                $set:
+                {
+                    state: 'For Sale'
+                }
+            }
+        );
+
+        if (!unReservedCar) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating Car Model' });
+            return;
+        }
+
+        const unReservingForUser = await UserModel.findOneAndUpdate({ username: req.params.username },
+            {
+                $pull:
+                {
+                    reservedCarVINs: req.params.VIN
+                }
+            }
+        );
+
+        if (!unReservingForUser) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating User Model' });
+            return;
+        }
+
+        res.status(200).json({ unReservedCar });
+
+    }
+    catch (error) {
+        res.status(500).json({ message: error });
+    }
 }
 
 export async function buyCar(
@@ -239,7 +369,12 @@ export async function buyCar(
                     state: 'Sold'
                 }
             }
-        )
+        );
+
+        if (!boughtCar) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating Car Model' });
+            return;
+        }
 
         const updateUserBoughtList = await UserModel.findOneAndUpdate({ username: req.params.username },
             {
@@ -252,7 +387,12 @@ export async function buyCar(
                     reservedCarVINs: req.params.VIN
                 }
             }
-        )
+        );
+
+        if (!updateUserBoughtList) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating User Model' });
+            return;
+        }
 
         res.status(200).json({ boughtCar });
     }

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { Application, json } from "express";
-import { ConnectOptions, connect } from 'mongoose';
+import { connect } from 'mongoose';
 import cors from 'cors';
 import {connect as connectAPI} from "./api/connect"
 
@@ -9,7 +9,13 @@ dotenv.config();
 
 const DB_CONNECTION = process.env.DB_CONNECTION_STRING;
 
-const PORT = 3000
+const PORT = process.env.PORT || 3001;
+
+export const ZEROBOUNCE_KEY = process.env.ZEROBOUNCE_API_KEY;
+
+export const STRIPE_KEY = process.env.STRIPE_API_KEY;
+
+console.log("STRIPE_KEY : ", STRIPE_KEY);
 
 const app: Application = express();
 

@@ -1,12 +1,11 @@
 import Stripe from 'stripe'
-import axios from 'axios';
-
-// TODO ARM : ADD API KEY TO .ENV
-const stripe = new Stripe('your_secret_key', {
-    apiVersion: '2023-10-16', // Use the latest API version
-});
+import { STRIPE_KEY, ZEROBOUNCE_KEY } from '..';
 
 export const validateDebitCard = async (cardNumber: string, expMonth: number, expYear: number, cvc: string) => {
+    const stripe = new Stripe(STRIPE_KEY, {
+        apiVersion: '2023-10-16', // Use the latest API version
+    });
+
     const paymentMethod = await stripe.paymentMethods.create({
         type: 'card',
         card: {
@@ -16,22 +15,31 @@ export const validateDebitCard = async (cardNumber: string, expMonth: number, ex
             cvc: cvc,
         },
     });
+
+    // card: {
+    //     number: '4242424242424242',
+    //     exp_month: 8,
+    //     exp_year: 2026,
+    //     cvc: '314',
+    //   },
 };
 
-const ZEROBOUNCE_API_KEY = 'YOUR_ZEROBOUNCE_API_KEY'; // TODO ARM : ADD API KEY TO .ENV
-
 export const validateEmail = async (email: string) => {
-    const response = await axios.post(
-        'https://api.zerobounce.net/v2/validate',
-        {
-            email,
-            api_key: ZEROBOUNCE_API_KEY,
-        }
-    );
+    const apiURL = 'https://api.zerobounce.net/v2/validate';
+    const queryString = `?api_key=${ZEROBOUNCE_KEY}&email=${email}&ip_address=`;
+    const fullURL = apiURL + queryString;
 
-    const { status, body } = response.data;
+    const response = await fetch(fullURL);
 
-    if (status !== 'valid') {
-        throw JSON.stringify(body);
+    if (!response.ok) {
+        console.log(`Error validating email. Status: ${response.status}`)
+        throw new Error(`Error validating email. Status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.status !== 'valid') {
+        console.log(`Not Valid`)
+        throw JSON.stringify(result);
     }
 };

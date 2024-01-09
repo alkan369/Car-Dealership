@@ -51,7 +51,12 @@ export async function addLeaseToUser(
                     state: 'Sold'
                 }
             }
-        )
+        );
+
+        if (!boughtCar) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating Car Model' });
+            return;
+        }
 
         const updateUserBoughtList = await UserModel.findOneAndUpdate({ username: req.params.username },
             {
@@ -64,7 +69,12 @@ export async function addLeaseToUser(
                     reservedCarVINs: req.params.VIN
                 }
             }
-        )
+        );
+
+        if (!updateUserBoughtList) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating User Model' });
+            return;
+        }
 
         const firstPayment = carToBeBought.price * (req.body.percentFirstPayment / 100);
         const remainingPrice = carToBeBought.price - firstPayment;
@@ -113,7 +123,13 @@ export async function payLease(
                 {
                     paymentCntRemaining: leaseToBeUpdated.paymentCntRemaining - 1
                 }
-            })
+            }
+        );
+
+        if (!updateLease) {
+            res.status(500).json({ message: 'Internal ServerError Error Updating Lease Model' });
+            return;
+        }
 
         res.status(200).json(updateLease);
     }
@@ -129,7 +145,7 @@ export async function removeLease(
     try {
         const deletedLease = await LeaseModel.findOneAndDelete({ VIN: req.params.VIN, buyerUsername: req.params.username });
         if (!deletedLease) {
-            res.status(500).json({ message: 'Internal Server Error' });
+            res.status(500).json({ message: 'No Lease With Such VIN And Such Username' });
             return;
         }
 
