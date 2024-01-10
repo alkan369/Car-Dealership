@@ -96,13 +96,17 @@ export async function createUser(
             isAdmin: req.body.isAdmin ? true : false
         })
 
+        console.log("Alkan Line 99");
         const validationError = newUser.validateSync();
+        console.log("Alkan Line 101");
         if (validationError) {
             res.status(400).json(validationError);
             return;
         }
-
+        
+        console.log("Alkan Line 107");
         await newUser.save();
+        console.log("Alkan Line 108");
         const token = tokenGenerator(req.body.username);
         if (newUser.isAdmin) {
             res.status(201).json({ 'token': 'Admin' + token });
@@ -120,19 +124,23 @@ export async function loginUser(
     res: express.Response
 ): Promise<void> {
     try {
-        const searchedUser = await UserModel.findOne({ username: req.body.Username })
+        const searchedUser = await UserModel.findOne({ username: req.body.username })
         if (!searchedUser || !await compare(req.body.password, searchedUser.password.toString())) {
             res.status(401).json({ message: 'Invalid Username Or Password' });
             return;
         }
 
+        console.log("Alkan Line 133");
         const token = tokenGenerator(searchedUser.username.toString());
-
+        console.log("Alkan Line 135");
+        
         if (searchedUser.isAdmin) {
             res.status(200).json({ 'token': 'Admin' + token });
+            console.log("Alkan Line 139");
         }
         else {
             res.status(200).json({ 'token': token });
+            console.log("Alkan Line 143");
         }
     }
     catch (error) {

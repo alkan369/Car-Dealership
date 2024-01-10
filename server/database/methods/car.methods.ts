@@ -3,6 +3,7 @@ import { CarModel } from "../models/car.model";
 import mongoose, { mongo } from "mongoose";
 import { engineType, transmissionType } from "../schemas/car.schema";
 import { UserModel } from "../models/user.model";
+import { simulatePayment } from "../../external/external-api-methods";
 
 export async function getAllCars(
     req: express.Request,
@@ -362,6 +363,14 @@ export async function buyCar(
             return;
         }
 
+        try {
+            // simulate payment before modifying car and user db
+            simulatePayment(carToBeBought.price, 'bgn');
+        }
+        catch (error) {
+            res.status(400).json(error);
+        }
+
         const boughtCar = await CarModel.findOneAndUpdate({ VIN: req.params.VIN },
             {
                 $set:
@@ -393,6 +402,7 @@ export async function buyCar(
             res.status(500).json({ message: 'Internal ServerError Error Updating User Model' });
             return;
         }
+
 
         res.status(200).json({ boughtCar });
     }

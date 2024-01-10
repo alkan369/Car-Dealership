@@ -15,8 +15,6 @@ export const ZEROBOUNCE_KEY = process.env.ZEROBOUNCE_API_KEY;
 
 export const STRIPE_KEY = process.env.STRIPE_API_KEY;
 
-console.log("STRIPE_KEY : ", STRIPE_KEY);
-
 const app: Application = express();
 
 app.use(json());

@@ -6,15 +6,15 @@ export const validateDebitCard = async (cardNumber: string, expMonth: number, ex
         apiVersion: '2023-10-16', // Use the latest API version
     });
 
-    const paymentMethod = await stripe.paymentMethods.create({
-        type: 'card',
-        card: {
-            number: cardNumber,
-            exp_month: expMonth,
-            exp_year: expYear,
-            cvc: cvc,
-        },
-    });
+    // const paymentMethod = await stripe.paymentMethods.create({
+    //     type: 'card',
+    //     card: {
+    //         number: cardNumber,
+    //         exp_month: expMonth,
+    //         exp_year: expYear,
+    //         cvc: cvc,
+    //     },
+    // });
 
     // card: {
     //     number: '4242424242424242',
@@ -22,6 +22,19 @@ export const validateDebitCard = async (cardNumber: string, expMonth: number, ex
     //     exp_year: 2026,
     //     cvc: '314',
     //   },
+};
+
+export const simulatePayment = async (desiredAmount: number, desiredCurrency: string) => {
+    const stripe = new Stripe(STRIPE_KEY, {
+        apiVersion: '2023-10-16', // Use the latest API version
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create(
+        {
+            amount: desiredAmount,
+            currency: desiredCurrency,
+        }
+    );
 };
 
 export const validateEmail = async (email: string) => {

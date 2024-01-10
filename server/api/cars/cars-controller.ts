@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { CarModel } from "../../database/models/car.model";
 import { engineType, transmissionType } from "../../database/schemas/car.schema";
-import { addCar, getAllAvailableCars, getAllCars, getByBrand, getByBrandAndModel, getByBrandAndModelAndEngine, getByBrandAndModelAndEngineAndTransmission, getByEngine, getByEngineAndTransmission, getByTransmission, getByVIN, removeCar } from "../../database/methods/car.methods";
+import { addCar, buyCar, getAllAvailableCars, getAllCars, getByBrand, getByBrandAndModel, getByBrandAndModelAndEngine, getByBrandAndModelAndEngineAndTransmission, getByEngine, getByEngineAndTransmission, getByTransmission, getByVIN, removeCar, reserveCar, unReserveCar } from "../../database/methods/car.methods";
 import { LeaseModel } from "../../database/models/lease.model";
 import { validateAdmin, validateToken } from "../../middleware/token-validator";
 
@@ -46,6 +46,52 @@ carsController.get('/view_by_engine_and_transmission/:engine/:transmission', asy
 carsController.get('/view_by_brand_and_model_and_engine_and_transmission/:brand/:model/:engine/:transmission', async (req, res) => {
     await getByBrandAndModelAndEngineAndTransmission(req, res);
 });
+
+
+carsController.put('/unreserve/:VIN/:username', validateToken, async (req, res) => {
+    const VIN = req.params.VIN;
+    const username = req.params.username;
+
+    if (!VIN || VIN === '') {
+        return res.status(400).json({ message: 'VIN Not Entered' });
+    }
+
+    if (!username || username === '') {
+        return res.status(400).json({ message: 'Username Not Entered' });
+    }
+
+    await unReserveCar(req, res);
+})
+
+carsController.put('/reserve/:VIN/:username', validateToken, async (req, res) => {
+    const VIN = req.params.VIN;
+    const username = req.params.username;
+
+    if (!VIN || VIN === '') {
+        return res.status(400).json({ message: 'VIN Not Entered' });
+    }
+
+    if (!username || username === '') {
+        return res.status(400).json({ message: 'Username Not Entered' });
+    }
+    
+    await reserveCar(req, res);
+})
+
+carsController.post('/buy/:VIN/:username', validateToken, async (req, res) => {
+    const VIN = req.params.VIN;
+    const username = req.params.username;
+    
+    if (!VIN || VIN === '') {
+        return res.status(400).json({ message: 'VIN Not Entered' });
+    }
+    
+    if (!username || username === '') {
+        return res.status(400).json({ message: 'Username Not Entered' });
+    }
+    
+    await buyCar(req, res);
+})
 
 carsController.post('/add_car/', validateAdmin, validateToken, async (req, res) => {
     const VIN = req.body.VIN;

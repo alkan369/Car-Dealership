@@ -3,16 +3,18 @@ import { verify } from "jsonwebtoken";
 
 export const validateToken = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    // console.log("HEADER: ", authHeader);
-    const adminToken = authHeader.slice(0,5);
+    console.log("HEADER: ", authHeader);
+    const adminToken = authHeader.split(' ').pop().slice(1,6);
 
-    const token = authHeader && (adminToken === 'Admin'? authHeader.slice(5).split(' ').pop() : authHeader.split(' ').pop());
+    const token = authHeader && (adminToken === 'Admin'? '"' + authHeader.split(' ').pop().slice(6) : authHeader.split(' ').pop());
 
     if (!token) {
         return res.status(401).send('Invalid token format');
     }
 
     try {
+        console.log("Alkan - adm token : ", adminToken);
+        console.log("Alkan - token : ", token);
         const user = verify(token, process.env.ACCESS_TOKEN_SECRET as string);
         // console.log("User: ", username);
 

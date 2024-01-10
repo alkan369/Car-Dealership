@@ -3,6 +3,7 @@ import { LeaseModel } from "../models/lease.model"
 import mongoose from "mongoose";
 import { CarModel } from "../models/car.model";
 import { UserModel } from "../models/user.model";
+import { simulatePayment } from "../../external/external-api-methods";
 
 export async function getUserLeases(
     req: express.Request,
@@ -42,6 +43,15 @@ export async function addLeaseToUser(
         if (carToBeBought.state === 'Sold') {
             res.status(400).json({ message: 'The Car Is Already Sold' });
             return;
+        }
+
+        try {
+            const firstPayment = carToBeBought.price * (req.body.percentFirstPayment / 100);
+            // simulate payment before modifying car, user and lease db
+            simulatePayment(firstPayment, 'bgn');
+        }
+        catch (error) {
+            res.status(400).json(error);
         }
 
         const boughtCar = await CarModel.findOneAndUpdate({ VIN: req.params.VIN },
@@ -115,6 +125,14 @@ export async function payLease(
         if (leaseToBeUpdated.paymentCntRemaining === 1) {
             await removeLease(req, res);
             return;
+        }
+
+        try {
+            // simulate payment before modifying lease db
+            simulatePayment(leaseToBeUpdated.leasePayment, 'bgn');
+        }
+        catch (error) {
+            res.status(400).json(error);
         }
 
         const updateLease = await LeaseModel.findOneAndUpdate({ VIN: req.params.VIN, buyerUsername: req.params.username },
