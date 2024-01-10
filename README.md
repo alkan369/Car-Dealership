@@ -107,6 +107,7 @@ Then it pull the latest docker image and starts a new container.
 ### Deploy to Minikube via ArgoCD
 
 ArgoCD has been installed in local minicube, which tracks
-https://github.com/alkan369/argocd-app-config/tree/main
+github.com/alkan369/argocd-app-config/tree/main
 where configuration for deployment and for ArgoCD is stored.
-When the version of the image is changed and the change is committed to the repository, ArgoCD automatically syncs the deployment with it.
+When the version of the image is changed and the change is committed
+to the repository, ArgoCD automatically syncs the deployment with it.
