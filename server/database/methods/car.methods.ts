@@ -203,7 +203,7 @@ export async function removeCar(
     res: express.Response
 ): Promise<void> {
     try {
-        const deletedCar = await CarModel.findOneAndDelete({ VIN: req.body.VIN });
+        const deletedCar = await CarModel.findOneAndDelete({ VIN: req.params.VIN });
         if (!deletedCar) {
             res.status(400).json({ message: 'No Car With Such VIN' });
             return;

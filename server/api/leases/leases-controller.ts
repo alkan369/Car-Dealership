@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addLeaseToUser, getUserLeases, payLease } from "../../database/methods/lease.methods";
+import { addLeaseToUser, getAllLeases, getUserLeases, payLease } from "../../database/methods/lease.methods";
 import { PaymentCnt, PercentFirstPayment } from "../../database/schemas/lease.schema";
 import { validateAdmin, validateToken } from "../../middleware/token-validator";
 
@@ -12,6 +12,10 @@ leasesController.get('/view_payment_amount', async (req, res) => {
             'PaymentCnt': PaymentCnt.toString()
         }
     )
+})
+
+leasesController.get('/view_all', validateAdmin, validateToken, async (req, res) => {
+    await getAllLeases(req, res);
 })
 
 leasesController.get('/view_all/:username', validateAdmin, validateToken, async (req, res) => {

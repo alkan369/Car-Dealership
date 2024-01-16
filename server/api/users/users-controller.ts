@@ -4,6 +4,7 @@ import { validateAdmin, validateToken } from "../../middleware/token-validator";
 import { LeaseModel } from "../../database/models/lease.model";
 import { UserModel } from "../../database/models/user.model";
 import { validateDebitCard, validateEmail } from "../../external/external-api-methods";
+import { CarModel } from "../../database/models/car.model";
 
 const usersController = Router();
 
@@ -162,8 +163,29 @@ usersController.delete('/delete/:username', validateAdmin, validateToken, async 
     }
     
     const checkLease = await LeaseModel.find({ buyerUsername: req.params.username });
-    if (checkLease) {
+    if (checkLease.length !== 0) {
         return res.status(400).json({ message: 'User Has Remaining Payments' });
+    }
+
+    const userToBeDeleted = await UserModel.findOne({ username: req.params.username });
+
+    if(userToBeDeleted.boughtCarVINs.length !== 0) {
+        for(let carVIN of userToBeDeleted.boughtCarVINs) {
+            await CarModel.findOneAndDelete({ VIN: carVIN });
+        }
+    }
+
+    if(userToBeDeleted.reservedCarVINs.length !== 0) {
+        for(let carVIN of userToBeDeleted.reservedCarVINs) {
+            await CarModel.findOneAndUpdate({ VIN: carVIN },
+                {
+                    $set:
+                    {
+                        state: 'For Sale'
+                    }
+                }
+            );
+        }
     }
 
     await deleteUser(req, res);

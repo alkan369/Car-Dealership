@@ -15,7 +15,7 @@ carsController.get('/view_all_available', async (req, res) => {
     await getAllAvailableCars(req, res);
 });
 
-carsController.get('/view_by_vin/:vin', async (req, res) => {
+carsController.get('/view_by_vin/:VIN', async (req, res) => {
     await getByVIN(req, res);
 });
 

@@ -31,8 +31,14 @@ export const simulatePayment = async (desiredAmount: number, desiredCurrency: st
 
     const paymentIntent = await stripe.paymentIntents.create(
         {
-            amount: desiredAmount,
+            amount: Number(desiredAmount.toFixed(2)) * 100,
             currency: desiredCurrency,
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: 'never'
+            },
+            confirm: true,
+            payment_method: 'pm_card_visa'
         }
     );
 };

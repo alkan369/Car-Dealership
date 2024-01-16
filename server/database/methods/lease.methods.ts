@@ -5,6 +5,19 @@ import { CarModel } from "../models/car.model";
 import { UserModel } from "../models/user.model";
 import { simulatePayment } from "../../external/external-api-methods";
 
+export async function getAllLeases(
+    req: express.Request,
+    res: express.Response
+): Promise<void> {
+    try {
+        const userLeases = await LeaseModel.find();
+        res.status(200).json(userLeases);
+    }
+    catch (error) {
+        res.status(500).json({ message: error })
+    }
+}
+
 export async function getUserLeases(
     req: express.Request,
     res: express.Response
